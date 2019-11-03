@@ -4,5 +4,6 @@ This package allows a method of your Go application of only one access at the sa
 
 ## Usage
 
-Just Do something `res, err := Do("uniqueKey", something(t))`.
-To see more on `avalanche_test.go`.
+- `go get github.com/naiba/avalanche`.
+- Just Do something `res, err := avalanche.Do("uniqueKey", something(t))`.
+- To see more on `avalanche_test.go`.
