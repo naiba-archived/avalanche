@@ -7,31 +7,37 @@ import (
 type runnerS struct {
 	cond *sync.Cond
 	wg   *sync.WaitGroup
+	res  interface{}
+	err  error
 }
 
 var locker sync.Mutex
 var keys map[interface{}]*runnerS
 
+func init() {
+	keys = make(map[interface{}]*runnerS)
+}
+
 // Do something anti avalanche
-func Do(key interface{}, something func() (interface{}, error)) (interface{}, error) {
+func Do(uniqueKey interface{}, something func() (interface{}, error)) (interface{}, error) {
 	locker.Lock()
-	var res interface{}
-	var err error
-	runner, has := keys[key]
+	runner, has := keys[uniqueKey]
 	if !has {
 		runner = &runnerS{
 			sync.NewCond(new(sync.Mutex)),
 			new(sync.WaitGroup),
+			nil,
+			nil,
 		}
-		keys[key] = runner
+		keys[uniqueKey] = runner
 		locker.Unlock()
 		defer func() {
 			runner.wg.Wait()
-			keys[key] = nil
-			delete(keys, key)
+			keys[uniqueKey] = nil
+			delete(keys, uniqueKey)
 			locker.Unlock()
 		}()
-		res, err = something()
+		runner.res, runner.err = something()
 		locker.Lock()
 		runner.cond.L.Lock()
 		runner.cond.Broadcast()
@@ -46,5 +52,5 @@ func Do(key interface{}, something func() (interface{}, error)) (interface{}, er
 		}()
 		runner.cond.Wait()
 	}
-	return res, err
+	return runner.res, runner.err
 }
