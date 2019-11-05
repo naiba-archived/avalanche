@@ -1,4 +1,4 @@
-# Anti avalanche
+# Avalanche [![GolangCI](https://golangci.com/badges/github.com/naiba/avalanche.svg)](https://golangci.com/r/github.com/naiba/avalanche)
 
 This package allows a method of your Go application of only one access at the same time, and can get the same results are returned.
 
