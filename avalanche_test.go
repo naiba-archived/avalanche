@@ -1,6 +1,7 @@
 package avalanche
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -12,16 +13,16 @@ func TestDo(t *testing.T) {
 	var wg sync.WaitGroup
 	for j := 0; j < 200; j++ {
 		wg.Add(1)
-		go func(runnerID int, tt *testing.T) {
+		go t.Run(fmt.Sprintf("Runner %d", j), func(t1 *testing.T) {
 			defer wg.Done()
-			t.Log("Runner", runnerID, "want to do something")
+			t.Log("Runner", j, "want to do something")
 			res, err := Do("test", something(t))
 			if err != nil || res.(int64) > 1 {
-				tt.FailNow()
+				t1.FailNow()
 				return
 			}
-			t.Log("Runner", runnerID, "getted res", res, err)
-		}(j, t)
+			t.Log("Runner", j, "getted res", res, err)
+		})
 	}
 	wg.Wait()
 }
